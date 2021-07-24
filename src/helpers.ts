@@ -1,3 +1,5 @@
+import {glMatrix, vec3} from "gl-matrix";
+
 export function createShader(gl: WebGL2RenderingContext, shaderType: number, shaderSrc: string): WebGLShader {
     let shader = gl.createShader(shaderType);
     gl.shaderSource(shader, shaderSrc);
@@ -65,4 +67,13 @@ export function updateTransform
                      name: string) {
     let pointer = gl.getUniformLocation(program, name);
     gl.uniformMatrix4fv(pointer, false, data,0,16);
+}
+
+export function createPlayerViewVec(playerPos: vec3, length: number,
+                                    xRotation: number, yRotation: number): vec3 {
+    let temp1: vec3 = [0,0,0];
+    let temp2: vec3 = [0,0,0];
+    vec3.rotateX(temp2, [0,length,0], [0,0,0], glMatrix.toRadian(xRotation));
+    vec3.rotateX(temp1, temp2, [0,0,0], glMatrix.toRadian(yRotation));
+    return temp1;
 }

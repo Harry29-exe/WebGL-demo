@@ -17,7 +17,10 @@ export function init() {
 
     gl.clearColor(0.2, 0.2, 0.2, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+    gl.frontFace(gl.CCW);
+    gl.cullFace(gl.BACK);
 
     let vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSrc);
     let fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSrc);
@@ -67,7 +70,7 @@ export function init() {
     let deg = [15, 15];
 
     setUpCanvas(canvas, deg);
-    setUpMove(canvas, playerPos);
+    setUpMove(canvas, playerPos, deg);
 
 
     let identity = new Float32Array(16);
@@ -75,8 +78,8 @@ export function init() {
     let tLookAt = new Float32Array(3);
     mat4.identity(identity);
     const loop = () => {
-        lookAt = [playerPos[0], playerPos[1], playerPos[2]+1];
-        mat4.lookAt(viewMatrix, new Float32Array(playerPos),new Float32Array(lookAt), [0,0,1]);
+        lookAt = [playerPos[0], playerPos[1] + 1, playerPos[2]];
+        // mat4.lookAt(viewMatrix, new Float32Array(playerPos), new Float32Array(lookAt), [0,0,1]);
         vec3.rotateX(xLookAt, new Float32Array(lookAt), new Float32Array(playerPos), glMatrix.toRadian(deg[0]));
         vec3.rotateZ(tLookAt, new Float32Array(xLookAt), new Float32Array(playerPos), glMatrix.toRadian(deg[1]));
 
@@ -121,14 +124,14 @@ function setUpCanvas(canvas: HTMLCanvasElement, deg: number[]) {
     };
 }
 
-function setUpMove(canvas: HTMLCanvasElement, pos: number[]) {
+function setUpMove(canvas: HTMLCanvasElement, pos: number[], deg: number[]) {
     let pressedKeys: string[] = [];
     const offset = 0.1;
-    const time = 10;
+    const time = 1;
 
     document.addEventListener('keydown', (event: KeyboardEvent) => {
         console.log(event.key);
-        if(!(event.key in pressedKeys)) {
+        if (!(event.key in pressedKeys)) {
             pressedKeys.push(event.key);
         }
         switch (event.key) {
@@ -156,14 +159,39 @@ function setUpMove(canvas: HTMLCanvasElement, pos: number[]) {
     document.addEventListener('keyup', (event: KeyboardEvent) => {
         let index = pressedKeys.indexOf(event.key);
         delete pressedKeys[index];
-    })
+    });
+
+
+    // function moveWhilePressed(directionIndex: number, offset: number, keyPressed: string) {
+    //     pos[directionIndex] += offset;
+    //     if(keyPressed in pressedKeys) {
+    //         setTimeout(() => moveWhilePressed(directionIndex, offset, keyPressed), time);
+    //     }
+    // }
 
     function moveWhilePressed(directionIndex: number, offset: number, keyPressed: string) {
-        pos[directionIndex] += offset;
-        console.log(pos);
-        if(keyPressed in pressedKeys) {
+        if(directionIndex === 2) {
+            pos[directionIndex] += offset;
+        } else {
+            console.log(deg);
+            let moveVector: vec3 = [0, 0, 0];
+            moveVector[directionIndex] = offset;
+            let temp1: vec3 = new Float32Array(3);
+            let temp2: vec3 = new Float32Array(3);
+            vec3.rotateX(temp1, moveVector, [0, 0, 0], glMatrix.toRadian(deg[0]));
+            vec3.rotateZ(temp2, temp1, [0, 0, 0], glMatrix.toRadian(deg[1]));
+
+            temp2[2] = 0;
+            vec3.copy(temp1, pos as vec3);
+            vec3.add(temp1, temp2, pos as vec3);
+            console.log(temp2, '+', pos, '=', temp1);
+            pos[0] = temp1[0];
+            pos[1] = temp1[1];
+            pos[2] = temp1[2];
+        }
+
+        if (keyPressed in pressedKeys) {
             setTimeout(() => moveWhilePressed(directionIndex, offset, keyPressed), time);
         }
     }
 }
-
