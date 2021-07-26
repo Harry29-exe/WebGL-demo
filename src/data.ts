@@ -2,16 +2,16 @@ export const vertexShaderSrc = `#version 300 es
 precision mediump float;
 
 in vec3 vertPosition;
-in vec3 vertColor;
+in vec2 vertUV;
 
 uniform mat4 mWorld;
 uniform mat4 mView;
 uniform mat4 mProj;
 
-out vec3 fragColor;
+out vec2 fragUV;
 
 void main() {
-    fragColor = vertColor;
+    fragUV = vertUV;
     gl_Position = mProj * mView * mWorld * vec4(vertPosition, 1.0);
 }
 `
@@ -19,14 +19,14 @@ void main() {
 export const fragmentShaderSrc = `#version 300 es
 precision mediump float;
 
-in vec3 fragColor;
+in vec2 fragUV;
 out vec4 color;
+
+uniform sampler2D sampler;
 uniform vec2 screen;
 
 void main() {
-    
-    
-    color = vec4(fragColor[0], fragColor[1], fragColor[2], 1.0); 
+    color = texture(sampler, fragUV); 
 }
 `
 
@@ -41,42 +41,42 @@ void main() {
 // ]
 
 export const boxVertices =
-    [ // X, Y, Z           R, G, B
+    [ // X, Y, Z              U,V
         // Top
-        -1.0, 1.0, -1.0,   0.5, 0.5, 0.5,
-        -1.0, 1.0, 1.0,    0.5, 0.5, 0.5,
-        1.0, 1.0, 1.0,     0.5, 0.5, 0.5,
-        1.0, 1.0, -1.0,    0.5, 0.5, 0.5,
+            -1.0,  1.0, -1.0,   0, 0,
+            -1.0,  1.0,  1.0,   0, 1,
+             1.0,  1.0,  1.0,   1, 1,
+             1.0,  1.0, -1.0,   1, 0,
 
-        // Left
-        -1.0, 1.0, 1.0,    0.75, 0.25, 0.5,
-        -1.0, -1.0, 1.0,   0.75, 0.25, 0.5,
-        -1.0, -1.0, -1.0,  0.75, 0.25, 0.5,
-        -1.0, 1.0, -1.0,   0.75, 0.25, 0.5,
+            // Left
+            -1.0,  1.0,  1.0,   0, 0,
+            -1.0, -1.0,  1.0,   1, 0,
+            -1.0, -1.0, -1.0,   1, 1,
+            -1.0,  1.0, -1.0,   0, 1,
 
-        // Right
-        1.0, 1.0, 1.0,    0.25, 0.25, 0.75,
-        1.0, -1.0, 1.0,   0.25, 0.25, 0.75,
-        1.0, -1.0, -1.0,  0.25, 0.25, 0.75,
-        1.0, 1.0, -1.0,   0.25, 0.25, 0.75,
+            // Right
+             1.0,  1.0,  1.0,   1, 1,
+             1.0, -1.0,  1.0,   0, 1,
+             1.0, -1.0, -1.0,   0, 0,
+             1.0,  1.0, -1.0,   1, 0,
 
-        // Front
-        1.0, 1.0, 1.0,    1.0, 0.0, 0.15,
-        1.0, -1.0, 1.0,    1.0, 0.0, 0.15,
-        -1.0, -1.0, 1.0,    1.0, 0.0, 0.15,
-        -1.0, 1.0, 1.0,    1.0, 0.0, 0.15,
+            // Front
+             1.0,  1.0,  1.0,   1, 1,
+             1.0, -1.0,  1.0,   1, 0,
+            -1.0, -1.0,  1.0,   0, 0,
+            -1.0,  1.0,  1.0,   0, 1,
 
-        // Back
-        1.0, 1.0, -1.0,    0.0, 1.0, 0.15,
-        1.0, -1.0, -1.0,    0.0, 1.0, 0.15,
-        -1.0, -1.0, -1.0,    0.0, 1.0, 0.15,
-        -1.0, 1.0, -1.0,    0.0, 1.0, 0.15,
+            // Back
+             1.0,  1.0, -1.0,   0, 0,
+             1.0, -1.0, -1.0,   0, 1,
+            -1.0, -1.0, -1.0,   1, 1,
+            -1.0,  1.0, -1.0,   1, 0,
 
-        // Bottom
-        -1.0, -1.0, -1.0,   0.5, 0.5, 1.0,
-        -1.0, -1.0, 1.0,    0.5, 0.5, 1.0,
-        1.0, -1.0, 1.0,     0.5, 0.5, 1.0,
-        1.0, -1.0, -1.0,    0.5, 0.5, 1.0,
+            // Bottom
+            -1.0, -1.0, -1.0,   1, 1,
+            -1.0, -1.0,  1.0,   1, 0,
+             1.0, -1.0,  1.0,   0, 0,
+             1.0, -1.0, -1.0,   0, 1,
     ];
 
 export const boxIndices =

@@ -3,8 +3,9 @@ import {createBuffer, createProgram, createShader, setTransforms, updateTransfor
 import {glMatrix, mat4, vec3} from 'gl-matrix';
 
 
-export function init() {
-    document.getElementById('body').innerHTML = '<canvas id=\'canvas\'></canvas>';
+export async function init() {
+    document.getElementById('body').innerHTML += '<canvas id=\'canvas\'></canvas>';
+
 
     let canvas = document.getElementById('canvas') as HTMLCanvasElement;
     canvas.width = 900;
@@ -35,20 +36,30 @@ export function init() {
         3,
         gl.FLOAT,
         false,
-        6 * Float32Array.BYTES_PER_ELEMENT,
+        5 * Float32Array.BYTES_PER_ELEMENT,
         0
     );
     gl.enableVertexAttribArray(vertexPosition);
-    let colorPosition = gl.getAttribLocation(program, 'vertColor');
+    let colorPosition = gl.getAttribLocation(program, 'vertUV');
     gl.vertexAttribPointer(
         colorPosition,
-        3,
+        2,
         gl.FLOAT,
         false,
-        6 * Float32Array.BYTES_PER_ELEMENT,
+        5 * Float32Array.BYTES_PER_ELEMENT,
         3 * Float32Array.BYTES_PER_ELEMENT
     );
     gl.enableVertexAttribArray(colorPosition);
+
+    let textureLocation = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, textureLocation);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
+        document.getElementById('texture') as HTMLImageElement);
+
 
     gl.useProgram(program);
 
@@ -88,6 +99,13 @@ export function init() {
 
         updateTransform(gl, program, view, 'mView');
         render(gl);
+
+        gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+        gl.drawElements(gl.TRIANGLES, boxIndices.length, gl.UNSIGNED_BYTE, 0);
+        for(let i = 0; i < 12; i++) {
+            gl.drawElements(gl.LINE_LOOP, 3, gl.UNSIGNED_BYTE, i*3)
+        }
+        // gl.drawElements(gl.LINE_LOOP, boxIndices.length, gl.UNSIGNED_BYTE, 0);
 
         requestAnimationFrame(loop);
     }
